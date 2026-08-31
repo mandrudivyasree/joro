@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JORO — Cloud Operations Console</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f8f9fa;
+  color:#202124
+}
+
+.header{
+  height:68px;
+  background:#fff;
+  border-bottom:1px solid #dadce0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 28px
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:14px
+}
+
+.logo{
+  font-size:23px;
+  font-weight:700;
+  letter-spacing:.5px
+}
+
+.subtitle{
+  color:#5f6368;
+  font-size:14px;
+  border-left:1px solid #dadce0;
+  padding-left:14px
+}
+
+.agent-live{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:13px;
+  color:#188038;
+  font-weight:600
+}
+
+.dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:#34a853
+}
+
+.container{
+  max-width:1250px;
+  margin:auto;
+  padding:28px
+}
+
+.page-title{
+  margin-bottom:22px
+}
+
+.page-title h1{
+  margin:0 0 6px;
+  font-size:25px
+}
+
+.page-title p{
+  margin:0;
+  color:#5f6368;
+  font-size:14px
+}
+
+.status-row{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+  margin-bottom:22px
+}
+
+.card{
+  background:white;
+  border:1px solid #dadce0;
+  border-radius:10px;
+  padding:20px
+}
+
+.label{
+  color:#5f6368;
+  font-size:13px;
+  margin-bottom:8px
+}
+
+.value{
+  font-size:27px;
+  font-weight:600
+}
+
+.green{color:#188038}
+.red{color:#d93025}
+
+.scenario-bar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:white;
+  border:1px solid #dadce0;
+  border-radius:10px;
+  padding:14px 18px;
+  margin-bottom:22px
+}
+
+.scenario-title{
+  font-size:13px;
+  color:#5f6368
+}
+
+.scenario-buttons{
+  display:flex;
+  gap:8px
+}
+
+button{
+  border:1px solid #dadce0;
+  background:#fff;
+  padding:9px 15px;
+  border-radius:7px;
+  cursor:pointer;
+  font-size:13px;
+  font-weight:600
+}
+
+button:hover{
+  background:#f1f3f4
+}
+
+button.active{
+  background:#1a73e8;
+  color:white;
+  border-color:#1a73e8
+}
+
+button:disabled{
+  opacity:.65;
+  cursor:not-allowed
+}
+
+.main-grid{
+  display:grid;
+  grid-template-columns:1.5fr 1fr;
+  gap:22px
+}
+
+.incident{
+  border-left:5px solid #d93025
+}
+
+.incident.safe{
+  border-left-color:#188038
+}
+
+.incident-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center
+}
+
+.service{
+  font-size:21px;
+  font-weight:600
+}
+
+.badge{
+  background:#fce8e6;
+  color:#c5221f;
+  padding:6px 10px;
+  border-radius:14px;
+  font-size:12px;
+  font-weight:600
+}
+
+.badge.healthy{
+  background:#e6f4ea;
+  color:#137333
+}
+
+.metrics{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin:18px 0
+}
+
+.metric{
+  background:#f8f9fa;
+  padding:14px;
+  border-radius:8px
+}
+
+.metric span{
+  color:#5f6368;
+  font-size:12px
+}
+
+.metric strong{
+  display:block;
+  font-size:21px;
+  margin-top:5px
+}
+
+.section{
+  margin-top:22px
+}
+
+.section-title{
+  font-size:14px;
+  font-weight:700;
+  margin-bottom:10px
+}
+
+.timeline{
+  border-left:2px solid #dadce0;
+  padding-left:18px
+}
+
+.step{
+  padding:8px 0;
+  font-size:13px;
+  color:#5f6368
+}
+
+.step.complete{
+  color:#202124;
+  font-weight:600
+}
+
+.step.active{
+  color:#1a73e8;
+  font-weight:700
+}
+
+.step.blocked{
+  color:#d93025;
+  font-weight:700
+}
+
+.decision{
+  background:#f8f9fa;
+  padding:16px;
+  border-radius:8px;
+  margin-top:15px;
+  border:1px solid #eee
+}
+
+.decision.safe{
+  background:#e6f4ea;
+  border-color:#c6e6cc
+}
+
+.decision.blocked{
+  background:#fce8e6;
+  border-color:#f4c7c3
+}
+
+.decision strong{
+  color:#5f6368
+}
+
+.decision.safe strong{
+  color:#137333
+}
+
+.decision.blocked strong{
+  color:#c5221f
+}
+
+.decision p{
+  margin-bottom:0;
+  font-size:13px;
+  line-height:1.5
+}
+
+.reasoning{
+  line-height:1.6;
+  font-size:13px;
+  color:#5f6368
+}
+
+.reasoning p{
+  margin-top:0;
+  margin-bottom:16px
+}
+
+.action-box{
+  margin-top:20px;
+  padding-top:18px;
+  border-top:1px solid #eee
+}
+
+.action-button{
+  width:100%;
+  background:#1a73e8;
+  color:white;
+  border-color:#1a73e8;
+  padding:12px;
+  font-size:14px
+}
+
+.action-button:hover{
+  background:#1557b0
+}
+
+.action-button.danger{
+  background:#d93025;
+  border-color:#d93025
+}
+
+.log{
+  background:#202124;
+  color:#e8eaed;
+  border-radius:8px;
+  padding:15px;
+  font-family:monospace;
+  font-size:12px;
+  line-height:1.8;
+  margin-top:15px;
+  min-height:145px
+}
+
+.log .ok{color:#81c995}
+.log .warn{color:#fdd663}
+.log .error{color:#f28b82}
+
+.footer{
+  text-align:center;
+  color:#80868b;
+  font-size:12px;
+  margin-top:28px;
+  padding-bottom:10px
+}
+
+@media(max-width:900px){
+  .main-grid{grid-template-columns:1fr}
+  .status-row{grid-template-columns:1fr}
+}
+
+@media(max-width:600px){
+  .header{padding:0 15px}
+  .subtitle{display:none}
+  .container{padding:18px}
+  .metrics{grid-template-columns:1fr}
+  .scenario-bar{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:12px
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+
+  <div class="brand">
+    <div class="logo">JORO</div>
+    <div class="subtitle">Autonomous Google Cloud Operations</div>
+  </div>
+
+  <div class="agent-live">
+    <span class="dot"></span>
+    Agent Monitoring
+  </div>
+
+</header>
+
+
+<main class="container">
+
+  <div class="page-title">
+    <h1>Operations Console</h1>
+    <p>Autonomous incident detection, investigation and remediation.</p>
+  </div>
+
+
+  <div class="status-row">
+
+    <div class="card">
+      <div class="label">Services Monitored</div>
+      <div class="value">12</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Active Incidents</div>
+      <div class="value red" id="incidentCount">1</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Agent Status</div>
+      <div class="value green">Monitoring</div>
+    </div>
+
+  </div>
+
+
+  <div class="scenario-bar">
+
+    <div>
+      <div class="scenario-title">DEMO SCENARIO</div>
+    </div>
+
+    <div class="scenario-buttons">
+
+      <button id="checkoutBtn"
+              class="active"
+              onclick="loadScenario('checkout')">
+        checkout-api
+      </button>
+
+      <button id="paymentBtn"
+              onclick="loadScenario('payment')">
+        payment-api
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <div class="main-grid">
+
+
+    <!-- INCIDENT -->
+
+    <section class="card incident" id="incidentCard">
+
+      <div class="incident-header">
+
+        <div class="service" id="serviceName">
+          checkout-api
+        </div>
+
+        <div class="badge" id="healthBadge">
+          UNHEALTHY
+        </div>
+
+      </div>
+
+
+      <div class="metrics">
+
+        <div class="metric">
+          <span>Error Rate</span>
+          <strong id="errorRate">37%</strong>
+        </div>
+
+        <div class="metric">
+          <span>CPU Utilization</span>
+          <strong id="cpu">92%</strong>
+        </div>
+
+        <div class="metric">
+          <span>Request Latency</span>
+          <strong id="latency">4.8s</strong>
+        </div>
+
+      </div>
+
+
+      <div class="section">
+
+        <div class="section-title">
+          JORO Investigation
+        </div>
+
+        <div class="timeline" id="timeline">
+
+          <div class="step">
+            ○ OBSERVE — Awaiting investigation
+          </div>
+
+          <div class="step">
+            ○ INVESTIGATE — Pending
+          </div>
+
+          <div class="step">
+            ○ CORRELATE — Pending
+          </div>
+
+          <div class="step">
+            ○ DECIDE — Pending
+          </div>
+
+          <div class="step">
+            ○ ACT — Pending
+          </div>
+
+          <div class="step">
+            ○ VERIFY — Pending
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="section">
+
+        <div class="section-title">
+          Root Cause
+        </div>
+
+        <p id="rootCause">
+          Awaiting JORO investigation.
+        </p>
+
+      </div>
+
+
+      <div class="decision" id="decisionBox">
+
+        <strong id="decisionTitle">
+          Decision pending.
+        </strong>
+
+        <p id="decisionText">
+          JORO has not evaluated a remediation action yet.
+        </p>
+
+      </div>
+
+
+      <div class="action-box">
+
+        <button
+          class="action-button danger"
+          id="actionButton"
+          onclick="runAction()">
+          Investigate Incident
+        </button>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- DECISION ENGINE -->
+
+    <section class="card">
+
+      <div class="section-title">
+        JORO Decision Engine
+      </div>
+
+      <div class="reasoning" id="reasoning">
+
+        <p>
+          <strong>Status:</strong><br>
+          Incident detected. JORO is waiting to investigate.
+        </p>
+
+        <p>
+          JORO will inspect available signals, correlate evidence,
+          evaluate remediation risk and determine whether an action
+          is safe.
+        </p>
+
+      </div>
+
+
+      <div class="log" id="log">
+
+        <div class="ok">[JORO] Agent initialized</div>
+        <div>[MONITOR] Incident signal received</div>
+        <div class="warn">[WAIT] Investigation pending</div>
+
+      </div>
+
+    </section>
+
+  </div>
+
+
+  <div class="footer">
+    JORO • Autonomous Google Cloud Operations Agent
+  </div>
+
+</main>
+
+
+<script>
+
+const scenarios = {
+
+  checkout: {
+
+    service: "checkout-api",
+
+    error: "37%",
+
+    cpu: "92%",
+
+    latency: "4.8s",
+
+    rootCause:
+      'Container startup failure caused by a missing <strong>DATABASE_URL</strong> configuration.',
+
+    decision:
+      "Restart NOT recommended.",
+
+    explanation:
+      "The root cause is a missing configuration value. Restarting the service would not resolve the underlying problem and could increase the outage."
+
+  },
+
+
+  payment: {
+
+    service: "payment-api",
+
+    error: "19%",
+
+    cpu: "88%",
+
+    latency: "2.9s",
+
+    rootCause:
+      "Transient resource saturation detected. Recent logs show no persistent configuration failure.",
+
+    decision:
+      "Restart recommended.",
+
+    explanation:
+      "Evidence indicates temporary resource pressure. A controlled restart is considered a safe remediation."
+
+  }
+
+};
+
+
+let currentScenario = "checkout";
+
+let investigationComplete = false;
+
+let actionComplete = false;
+
+
+function loadScenario(name) {
+
+  currentScenario = name;
+
+  investigationComplete = false;
+
+  actionComplete = false;
+
+  const s = scenarios[name];
+
+
+  document.getElementById("serviceName").textContent =
+    s.service;
+
+  document.getElementById("errorRate").textContent =
+    s.error;
+
+  document.getElementById("cpu").textContent =
+    s.cpu;
+
+  document.getElementById("latency").textContent =
+    s.latency;
+
+
+  document.getElementById("rootCause").innerHTML =
+    "Awaiting JORO investigation.";
+
+
+  document.getElementById("decisionTitle").textContent =
+    "Decision pending.";
+
+
+  document.getElementById("decisionText").textContent =
+    "JORO has not evaluated a remediation action yet.";
+
+
+  document.getElementById("decisionBox").className =
+    "decision";
+
+
+  document.getElementById("actionButton").disabled =
+    false;
+
+
+  document.getElementById("actionButton").textContent =
+    "Investigate Incident";
+
+
+  document.getElementById("actionButton").className =
+    "action-button" + (name === "checkout" ? " danger" : "");
+
+
+  document.getElementById("incidentCard").className =
+    "card incident";
+
+
+  document.getElementById("healthBadge").textContent =
+    "UNHEALTHY";
+
+
+  document.getElementById("healthBadge").className =
+    "badge";
+
+
+  document.getElementById("incidentCount").textContent =
+    "1";
+
+
+  document.getElementById("checkoutBtn").classList.toggle(
+    "active",
+    name === "checkout"
+  );
+
+
+  document.getElementById("paymentBtn").classList.toggle(
+    "active",
+    name === "payment"
+  );
+
+
+  document.getElementById("timeline").innerHTML = `
+
+    <div class="step">
+      ○ OBSERVE — Awaiting investigation
+    </div>
+
+    <div class="step">
+      ○ INVESTIGATE — Pending
+    </div>
+
+    <div class="step">
+      ○ CORRELATE — Pending
+    </div>
+
+    <div class="step">
+      ○ DECIDE — Pending
+    </div>
+
+    <div class="step">
+      ○ ACT — Pending
+    </div>
+
+    <div class="step">
+      ○ VERIFY — Pending
+    </div>
+
+  `;
+
+
+  document.getElementById("reasoning").innerHTML = `
+
+    <p>
+      <strong>Status:</strong><br>
+      Incident detected. JORO is waiting to investigate.
+    </p>
+
+    <p>
+      JORO will inspect signals, correlate evidence and
+      evaluate remediation risk before taking action.
+    </p>
+
+  `;
+
+
+  document.getElementById("log").innerHTML = `
+
+    <div class="ok">[JORO] Agent initialized</div>
+
+    <div>[MONITOR] ${s.service} incident detected</div>
+
+    <div class="warn">[WAIT] Investigation pending</div>
+
+  `;
+
+}
+
+
+function runAction() {
+
+  const s = scenarios[currentScenario];
+
+  const button =
+    document.getElementById("actionButton");
+
+  const timeline =
+    document.getElementById("timeline");
+
+  const log =
+    document.getElementById("log");
+
+  const reasoning =
+    document.getElementById("reasoning");
+
+
+  if (!investigationComplete) {
+
+    button.disabled = true;
+
+    button.textContent = "Investigating...";
+
+
+    timeline.innerHTML = `
+
+      <div class="step complete">
+        ✓ OBSERVE — Health signals collected
+      </div>
+
+      <div class="step active">
+        → INVESTIGATE — Inspecting service logs
+      </div>
+
+      <div class="step">
+        ○ CORRELATE — Pending
+      </div>
+
+      <div class="step">
+        ○ DECIDE — Pending
+      </div>
+
+      <div class="step">
+        ○ ACT — Pending
+      </div>
+
+      <div class="step">
+        ○ VERIFY — Pending
+      </div>
+
+    `;
+
+
+    log.innerHTML += `
+      <div>[OBSERVE] Health signals collected</div>
+      <div>[INVESTIGATE] Inspecting recent service logs...</div>
+    `;
+
+
+    setTimeout(() => {
+
+      timeline.innerHTML = `
+
+        <div class="step complete">
+          ✓ OBSERVE — Health signals collected
+        </div>
+
+        <div class="step complete">
+          ✓ INVESTIGATE — Logs inspected
+        </div>
+
+        <div class="step active">
+          → CORRELATE — Comparing evidence
+        </div>
+
+        <div class="step">
+          ○ DECIDE — Pending
+        </div>
+
+        <div class="step">
+          ○ ACT — Pending
+        </div>
+
+        <div class="step">
+          ○ VERIFY — Pending
+        </div>
+
+      `;
+
+      log.innerHTML +=
+        `<div>[CORRELATE] Correlating service signals...</div>`;
+
+    }, 900);
+
+
+    setTimeout(() => {
+
+      investigationComplete = true;
+
+      document.getElementById("rootCause").innerHTML =
+        s.rootCause;
+
+
+      timeline.innerHTML = `
+
+        <div class="step complete">
+          ✓ OBSERVE — Health signals collected
+        </div>
+
+        <div class="step complete">
+          ✓ INVESTIGATE — Logs inspected
+        </div>
+
+        <div class="step complete">
+          ✓ CORRELATE — Root cause identified
+        </div>
+
+        <div class="step active">
+          → DECIDE — Evaluating remediation
+        </div>
+
+        <div class="step">
+          ○ ACT — Pending decision
+        </div>
+
+        <div class="step">
+          ○ VERIFY — Pending
+        </div>
+
+      `;
+
+
+      log.innerHTML +=
+        `<div>[CORRELATE] Evidence correlated</div>`;
+
+
+      reasoning.innerHTML = `
+
+        <p>
+          <strong>Observation:</strong><br>
+          Elevated error rate and resource utilization detected.
+        </p>
+
+        <p>
+          <strong>Investigation:</strong><br>
+          JORO inspected recent service logs and operational signals.
+        </p>
+
+        <p>
+          <strong>Correlation:</strong><br>
+          ${s.rootCause}
+        </p>
+
+        <p>
+          <strong>Next step:</strong><br>
+          JORO will evaluate whether restarting the service is safe.
+        </p>
+
+      `;
+
+
+      setTimeout(() => {
+
+        document.getElementById("decisionTitle").textContent =
+          s.decision;
+
+        document.getElementById("decisionText").textContent =
+          s.explanation;
+
+
+        if (currentScenario === "checkout") {
+
+          document.getElementById("decisionBox").className =
+            "decision blocked";
+
+
+          timeline.innerHTML = `
+
+            <div class="step complete">
+              ✓ OBSERVE — Health signals collected
+            </div>
+
+            <div class="step complete">
+              ✓ INVESTIGATE — Logs inspected
+            </div>
+
+            <div class="step complete">
+              ✓ CORRELATE — Root cause identified
+            </div>
+
+            <div class="step complete">
+              ✓ DECIDE — Unsafe restart detected
+            </div>
+
+            <div class="step blocked">
+              🚫 ACT — Restart blocked
+            </div>
+
+            <div class="step">
+              — VERIFY — Not required
+            </div>
+
+          `;
+
+
+          reasoning.innerHTML += `
+
+            <p>
+              <strong>Decision:</strong><br>
+              Restart blocked because the proposed action
+              does not address the root cause.
+            </p>
+
+          `;
+
+
+          log.innerHTML +=
+            `<div class="error">[DECIDE] Restart blocked — unsafe remediation</div>`;
+
+
+          button.textContent =
+            "Restart Prevented ✓";
+
+          button.disabled = true;
+
+
+        } else {
+
+          document.getElementById("decisionBox").className =
+            "decision safe";
+
+
+          timeline.innerHTML = `
+
+            <div class="step complete">
+              ✓ OBSERVE — Health signals collected
+            </div>
+
+            <div class="step complete">
+              ✓ INVESTIGATE — Logs inspected
+            </div>
+
+            <div class="step complete">
+              ✓ CORRELATE — Resource saturation confirmed
+            </div>
+
+            <div class="step complete">
+              ✓ DECIDE — Safe restart approved
+            </div>
+
+            <div class="step active">
+              → ACT — Controlled restart ready
+            </div>
+
+            <div class="step">
+              ○ VERIFY — Pending action
+            </div>
+
+          `;
+
+
+          log.innerHTML +=
+            `<div class="ok">[DECIDE] Controlled restart approved</div>`;
+
+
+          button.disabled = false;
+
+          button.textContent =
+            "Execute Safe Restart";
+
+        }
+
+      }, 700);
+
+    }, 1800);
+
+    return;
+  }
+
+
+  if (
+    currentScenario === "checkout"
+  ) {
+
+    return;
+
+  }
+
+
+  if (!actionComplete) {
+
+    actionComplete = true;
+
+    button.disabled = true;
+
+    button.textContent =
+      "Executing Safe Restart...";
+
+
+    log.innerHTML +=
+      `<div class="warn">[ACT] Executing controlled restart...</div>`;
+
+
+    timeline.innerHTML += `
+
+      <div class="step active">
+        → ACT — Controlled restart executing
+      </div>
+
+    `;
+
+
+    setTimeout(() => {
+
+      button.textContent =
+        "Verifying Service...";
+
+
+      log.innerHTML +=
+        `<div class="ok">[ACT] Restart completed</div>`;
+
+
+      timeline.innerHTML += `
+
+        <div class="step active">
+          → VERIFY — Checking service health
+        </div>
+
+      `;
+
+    }, 1200);
+
+
+    setTimeout(() => {
+
+      document.getElementById("errorRate").textContent =
+        "1.2%";
+
+      document.getElementById("cpu").textContent =
+        "54%";
+
+      document.getElementById("latency").textContent =
+        "420ms";
+
+
+      document.getElementById("healthBadge").textContent =
+        "HEALTHY";
+
+      document.getElementById("healthBadge").className =
+        "badge healthy";
+
+
+      document.getElementById("incidentCard").className =
+        "card incident safe";
+
+
+      document.getElementById("incidentCount").textContent =
+        "0";
+
+
+      document.getElementById("decisionBox").className =
+        "decision safe";
+
+
+      document.getElementById("decisionTitle").textContent =
+        "Service recovered.";
+
+
+      document.getElementById("decisionText").textContent =
+        "JORO verified that payment-api returned to healthy operating conditions after the controlled restart.";
+
+
+      timeline.innerHTML = `
+
+        <div class="step complete">
+          ✓ OBSERVE — Health signals collected
+        </div>
+
+        <div class="step complete">
+          ✓ INVESTIGATE — Logs inspected
+        </div>
+
+        <div class="step complete">
+          ✓ CORRELATE — Resource saturation confirmed
+        </div>
+
+        <div class="step complete">
+          ✓ DECIDE — Safe restart approved
+        </div>
+
+        <div class="step complete">
+          ✓ ACT — Controlled restart executed
+        </div>
+
+        <div class="step complete">
+          ✓ VERIFY — Service health restored
+        </div>
+
+      `;
+
+
+      reasoning.innerHTML = `
+
+        <p>
+          <strong>Observation:</strong><br>
+          Elevated resource utilization detected.
+        </p>
+
+        <p>
+          <strong>Investigation:</strong><br>
+          Recent service logs inspected.
+        </p>
+
+        <p>
+          <strong>Correlation:</strong><br>
+          Evidence indicated transient resource saturation.
+        </p>
+
+        <p>
+          <strong>Decision:</strong><br>
+          Controlled restart approved because no persistent
+          configuration failure was detected.
+        </p>
+
+        <p>
+          <strong>Verification:</strong><br>
+          Service health restored and incident resolved.
+        </p>
+
+      `;
+
+
+      log.innerHTML +=
+        `<div class="ok">[VERIFY] payment-api healthy — incident resolved</div>`;
+
+
+      button.textContent =
+        "Incident Resolved ✓";
+
+
+    }, 2800);
+
+  }
+
+}
+
+
+loadScenario("checkout");
+
+</script>
+
+</body>
+</html>
