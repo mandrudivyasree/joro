@@ -1,0 +1,157 @@
+import asyncio
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+
+from google.adk.runners import InMemoryRunner
+from google.genai import types
+
+from agent import root_agent
+
+app = FastAPI(title="Joro Operations API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:8080", "http://127.0.0.1:8080"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+runner = InMemoryRunner(agent=root_agent)
+
+
+class IncidentRequest(BaseModel):
+    service: str
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok", "agent": "joro"}
+
+
+@app.post("/investigate")
+async def investigate(request: IncidentRequest):
+
+    if request.service == "checkout-api":
+        scenario = """
+SCENARIO: CHECKOUT-API
+
+Use ONLY the checkout-api evidence below.
+
+Health:
+Status: UNHEALTHY
+Error rate: 37%
+Errors: HTTP 503, connection timeout, container startup failure
+
+Metrics:
+CPU utilization: 92%
+Request latency: 4.8 seconds
+Requests per second: 145
+
+Logs:
+Container failed to start because DATABASE_URL is missing.
+Health check failed after 3 attempts.
+HTTP 503 returned to client.
+Container restarted automatically.
+
+IMPORTANT:
+This is a persistent CONFIGURATION problem.
+The missing DATABASE_URL must be fixed before a restart can help.
+
+DECISION:
+DO NOT restart checkout-api.
+"""
+
+    elif request.service == "payment-api":
+        scenario = """
+SCENARIO: PAYMENT-API
+
+Use ONLY the payment-api evidence below.
+
+Health:
+Status: UNHEALTHY
+Error rate: 18%
+Errors: HTTP 503, transient container failure
+
+Logs:
+Transient container failure detected.
+Health check failed temporarily.
+No configuration errors detected.
+
+IMPORTANT:
+This is a TRANSIENT failure.
+There is no persistent configuration problem.
+
+DECISION:
+A restart is safe and justified.
+Restart payment-api and then verify recovery.
+"""
+
+    else:
+        return {
+            "service": request.service,
+            "result": "Unknown service scenario."
+        }
+
+    prompt = f"""
+You are Joro, an autonomous Google Cloud operations agent.
+
+Follow this operating loop:
+
+OBSERVE → INVESTIGATE → CORRELATE → DECIDE → ACT → VERIFY
+
+Never expose secrets or credentials.
+Never delete resources.
+Never modify IAM.
+Never change billing or project configuration.
+
+{scenario}
+
+You must follow the scenario evidence and decision policy above.
+
+If the decision is DO NOT restart, do NOT call restart_service.
+
+If the decision says restart is safe and justified:
+1. Call restart_service for the specified service.
+2. Then ALWAYS call verify_service_recovery.
+3. Report the verification result.
+
+Give a concise incident report containing:
+1. Observations
+2. Root cause
+3. Decision
+4. Action taken
+5. Verification result
+"""
+
+    session_id = f"ui-{request.service}"
+
+    await runner.session_service.create_session(
+        app_name=runner.app_name,
+        user_id="joro-ui",
+        session_id=session_id,
+    )
+
+    message = types.Content(
+        role="user",
+        parts=[types.Part(text=prompt)],
+    )
+
+    response_parts = []
+
+    async for event in runner.run_async(
+        user_id="joro-ui",
+        session_id=session_id,
+        new_message=message,
+    ):
+        if event.content and event.content.parts:
+            for part in event.content.parts:
+                if part.text:
+                    response_parts.append(part.text)
+
+    return {
+        "service": request.service,
+        "result": "\n".join(response_parts),
+    }
